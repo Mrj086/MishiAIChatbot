@@ -421,7 +421,7 @@ st.markdown("""
                     display:flex;align-items:center;justify-content:center;
                     font-size:12px;font-weight:700;color:white;">M</div>
         <div>
-            <span style="font-size:13px;font-weight:500;color:#e8e8f0;">Miraj</span>
+            <span style="font-size:13px;font-weight:500;color:#e8e8f0;">Md. Miraj-Ul-Islam</span>
             <span style="font-size:11px;color:#555870;margin-left:8px;">CSE Student · Bangladesh</span>
         </div>
     </div>
