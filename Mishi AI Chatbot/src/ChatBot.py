@@ -6,7 +6,7 @@ st.set_page_config(
     page_title="Mishi AI",
     page_icon="✨",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
 )
 
 GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -23,15 +23,9 @@ st.markdown("""
 [data-testid="stMain"] { background: #0f0f13 !important; }
 [data-testid="stHeader"] { display: none !important; }
 [data-testid="stToolbar"] { display: none !important; }
+[data-testid="stSidebar"] { display: none !important; }
 .stDeployButton { display: none !important; }
 #MainMenu, footer { visibility: hidden; }
-
-/* ── Sidebar ── */
-[data-testid="stSidebar"] {
-    background: #0a0a10 !important;
-    border-right: 1px solid #1e1e2e !important;
-}
-[data-testid="stSidebar"] > div:first-child { padding: 0 !important; }
 
 /* ── Buttons ── */
 .stButton > button {
@@ -51,7 +45,7 @@ st.markdown("""
     border-color: #6d28d9 !important;
 }
 
-/* ── Chat input — dark background, purple border ── */
+/* ── Chat input ── */
 [data-testid="stChatInput"] {
     background: #13131f !important;
     border: 1.5px solid #6d28d9 !important;
@@ -75,15 +69,13 @@ st.markdown("""
 }
 [data-testid="stChatInput"] button svg { fill: white !important; }
 
-/* ── Chat messages — remove default bg ── */
+/* ── Chat messages ── */
 [data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
     padding: 4px 0 !important;
     gap: 12px !important;
 }
-
-/* ── USER messages → RIGHT side ── */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
     flex-direction: row-reverse !important;
     text-align: right !important;
@@ -93,7 +85,6 @@ st.markdown("""
     display: flex !important;
     flex-direction: column !important;
 }
-/* Fallback using data-testid stChatMessageContent */
 div:has(> [data-testid="chatAvatarIcon-user"]) {
     flex-direction: row-reverse !important;
 }
@@ -115,15 +106,9 @@ div:has(> [data-testid="chatAvatarIcon-user"]) {
     0%,100% { opacity: 1; }
     50%      { opacity: 0.4; }
 }
-.thinking-wrap {
-    animation: thinkingSlideIn 0.4s cubic-bezier(.22,.68,0,1.2) both;
-}
-.thinking-bubble {
-    animation: thinkingPulse 2s ease-in-out infinite;
-}
-.thinking-text {
-    animation: thinkingTextBlink 1.6s ease-in-out infinite;
-}
+.thinking-wrap  { animation: thinkingSlideIn 0.4s cubic-bezier(.22,.68,0,1.2) both; }
+.thinking-bubble { animation: thinkingPulse 2s ease-in-out infinite; }
+.thinking-text  { animation: thinkingTextBlink 1.6s ease-in-out infinite; }
 .thinking-dot {
     display: inline-block;
     width: 7px; height: 7px;
@@ -134,20 +119,12 @@ div:has(> [data-testid="chatAvatarIcon-user"]) {
 }
 .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
 .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
-.thinking-label {
-    font-size: 12px; color: #6b6b80;
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 0 4px;
-}
 
-/* ── Streaming text animation ── */
+/* ── AI message animation ── */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.ai-response { animation: fadeIn 0.3s ease; }
-
-/* ── AI message bubble animation ── */
 @keyframes msgSlideIn {
     0%   { opacity: 0; transform: translateX(-18px) translateY(6px); }
     60%  { opacity: 1; transform: translateX(4px) translateY(0); }
@@ -158,6 +135,7 @@ div:has(> [data-testid="chatAvatarIcon-user"]) {
     60%  { transform: scale(1.03); opacity: 1; }
     100% { transform: scale(1);    opacity: 1; }
 }
+.ai-response   { animation: fadeIn 0.3s ease; }
 .ai-msg-wrap   { animation: msgSlideIn 0.45s cubic-bezier(.22,.68,0,1.2) both; }
 .ai-msg-bubble { animation: bubblePop  0.4s  cubic-bezier(.22,.68,0,1.2) 0.1s both; }
 
@@ -170,73 +148,7 @@ div:has(> [data-testid="chatAvatarIcon-user"]) {
 .stMarkdown pre { background: #1c1c2e !important; border: 1px solid #2a2a40 !important; border-radius: 10px !important; }
 code { color: #a78bfa !important; }
 hr { border-color: #1e1e2e !important; }
-
-/* ── Mobile sidebar toggle button ── */
-#sidebar-toggle-btn {
-    display: none;
-    position: fixed;
-    top: 14px;
-    right: 14px;
-    left: auto;
-    z-index: 999999;
-    background: linear-gradient(135deg,#6d28d9,#a78bfa);
-    border: none;
-    border-radius: 10px;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    box-shadow: 0 0 14px rgba(109,40,217,0.5);
-    transition: all 0.2s;
-}
-#sidebar-toggle-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 20px rgba(109,40,217,0.7);
-}
-@media (max-width: 768px) {
-    #sidebar-toggle-btn { display: flex; }
-}
 </style>
-
-<button id="sidebar-toggle-btn" title="Open Menu">☰</button>
-
-<script>
-(function() {
-    function tryClick() {
-        // Streamlit's native collapse/expand button selectors
-        var selectors = [
-            '[data-testid="collapsedControl"]',
-            '[data-testid="baseButton-headerNoPadding"]',
-            'button[aria-label="open sidebar"]',
-            'button[aria-label="close sidebar"]',
-            'section[data-testid="stSidebar"] + div button',
-            'button[kind="header"]'
-        ];
-        var doc = window.parent ? window.parent.document : document;
-        for (var i = 0; i < selectors.length; i++) {
-            var btn = doc.querySelector(selectors[i]);
-            if (btn) { btn.click(); return true; }
-        }
-        // Fallback: directly toggle sidebar style
-        var sidebar = doc.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            var curr = sidebar.style.marginLeft;
-            sidebar.style.marginLeft = (curr === '0px' || curr === '') ? '-21rem' : '0px';
-            sidebar.style.transition = 'margin-left 0.3s ease';
-            return true;
-        }
-        return false;
-    }
-
-    document.getElementById('sidebar-toggle-btn').addEventListener('click', function() {
-        if (!tryClick()) {
-            setTimeout(tryClick, 300);
-        }
-    });
-})();
-</script>
 """, unsafe_allow_html=True)
 
 
@@ -269,19 +181,32 @@ if st.session_state.chat is None:
         st.stop()
 
 
-# ── Sidebar ───────────────────────────────────────────────
-with st.sidebar:
+# ── Top bar ───────────────────────────────────────────────
+col_logo, col_mid, col_right = st.columns([2, 6, 2])
+
+with col_logo:
     st.markdown("""
-    <div style="display:flex;align-items:center;gap:10px;padding:20px 16px 16px;">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;">
         <div style="width:34px;height:34px;border-radius:10px;
                     background:linear-gradient(135deg,#6d28d9,#a78bfa);
                     display:flex;align-items:center;justify-content:center;font-size:16px;
-                    box-shadow:0 0 16px rgba(109,40,217,.4);">✨</div>
+                    box-shadow:0 0 16px rgba(109,40,217,.4);flex-shrink:0;">✨</div>
         <span style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;
                      color:#a78bfa;">Mishi AI</span>
     </div>
     """, unsafe_allow_html=True)
 
+with col_mid:
+    st.markdown("""
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:14px 0;">
+        <span style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#e8e8f0;">Mishi</span>
+        <span style="font-size:11px;color:#555870;background:#13131f;border:1px solid #1e1e2e;
+                     border-radius:20px;padding:2px 10px;">gemini-2.5-flash</span>
+        <span style="font-size:11px;color:#3a3d50;">· Intelligent AI Companion</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_right:
     if st.button("✏️  New Chat", key="new_chat"):
         st.session_state.messages = []
         st.session_state.chat = None
@@ -291,63 +216,28 @@ with st.sidebar:
             st.error(f"Could not start new chat: {e}")
         st.rerun()
 
+st.markdown("<hr style='margin:0 0 8px 0'>", unsafe_allow_html=True)
+
+
+# ── Recent chats bar ──────────────────────────────────────
+if st.session_state.recent_chats:
     st.markdown("""
     <div style="font-size:11px;font-weight:600;text-transform:uppercase;
-                letter-spacing:.08em;color:#555870;padding:14px 14px 6px;">Recent</div>
+                letter-spacing:.08em;color:#555870;padding:4px 0 6px;">Recent</div>
     """, unsafe_allow_html=True)
-
-    if st.session_state.recent_chats:
-        for label in reversed(st.session_state.recent_chats[-8:]):
-            short = (label[:32] + "…") if len(label) > 32 else label
+    recent_cols = st.columns(min(len(st.session_state.recent_chats[-4:]), 4))
+    for i, label in enumerate(reversed(st.session_state.recent_chats[-4:])):
+        short = (label[:28] + "…") if len(label) > 28 else label
+        with recent_cols[i]:
             st.markdown(f"""
-            <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;
-                        border-radius:8px;font-size:13px;color:#6b6b80;">
-                <span style="font-size:11px;flex-shrink:0;">💬</span>
+            <div style="background:#13131f;border:1px solid #1e1e2e;border-radius:8px;
+                        padding:6px 10px;font-size:12px;color:#6b6b80;
+                        display:flex;align-items:center;gap:6px;overflow:hidden;">
+                <span style="font-size:11px;">💬</span>
                 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{short}</span>
             </div>
             """, unsafe_allow_html=True)
-    else:
-        st.markdown("""
-        <div style="font-size:12px;color:#3a3d50;padding:6px 14px;font-style:italic;">
-            Your chats will appear here
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<hr style='margin:14px 0'>", unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;
-                background:#13131f;border:1px solid #1e1e2e;border-radius:12px;margin:0 8px 8px;">
-        <div style="width:30px;height:30px;border-radius:50%;
-                    background:linear-gradient(135deg,#6d28d9,#a78bfa);
-                    display:flex;align-items:center;justify-content:center;
-                    font-size:13px;font-weight:700;color:white;flex-shrink:0;">M</div>
-        <div>
-            <div style="font-size:13px;font-weight:500;color:#e8e8f0;">Miraj</div>
-            <div style="font-size:11px;color:#555870;">CSE Student · Bangladesh</div>
-        </div>
-    </div>
-    <div style="font-size:11px;color:#3a3d50;padding:4px 14px 8px;line-height:1.9;">
-        🔗 <a href="https://github.com/Mrj086/MishiAIchatbot" target="_blank"
-               style="color:#3b82f6;text-decoration:none;">GitHub</a> ·
-        <a href="https://www.linkedin.com/in/md-miraj-ul-islam-77b30b26a/" target="_blank"
-           style="color:#3b82f6;text-decoration:none;">LinkedIn</a>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-# ── Top bar ───────────────────────────────────────────────
-st.markdown("""
-<div style="display:flex;align-items:center;justify-content:space-between;
-            padding:12px 8px;border-bottom:1px solid #1e1e2e;margin-bottom:4px;">
-    <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:#e8e8f0;">Mishi</span>
-        <span style="font-size:11px;color:#555870;background:#13131f;border:1px solid #1e1e2e;
-                     border-radius:20px;padding:2px 10px;">gemini-2.5-flash</span>
-    </div>
-    <span style="font-size:11px;color:#3a3d50;">Intelligent AI Companion</span>
-</div>
-""", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom:8px'></div>", unsafe_allow_html=True)
 
 
 # ── Welcome screen ────────────────────────────────────────
@@ -430,7 +320,6 @@ if st.session_state.pending:
     st.session_state.pending = ""
 
     st.session_state.messages.append({"role": "user", "content": prompt})
-    # Show user message immediately RIGHT
     st.markdown(f"""
     <div style="display:flex;align-items:flex-start;gap:10px;margin:10px 0;justify-content:flex-end;">
         <div style="background:#6d28d9;border-radius:18px 4px 18px 18px;
@@ -444,7 +333,6 @@ if st.session_state.pending:
     </div>
     """, unsafe_allow_html=True)
 
-    # Track recent
     short = prompt[:40]
     if not st.session_state.recent_chats or st.session_state.recent_chats[-1] != short:
         st.session_state.recent_chats.append(short)
@@ -494,7 +382,6 @@ if user_input:
     </div>
     """, unsafe_allow_html=True)
 
-    # Track recent
     short = text[:40]
     if not st.session_state.recent_chats or st.session_state.recent_chats[-1] != short:
         st.session_state.recent_chats.append(short)
@@ -522,3 +409,27 @@ if user_input:
     thinking_box.empty()
     st.session_state.messages.append({"role": "assistant", "content": reply})
     st.rerun()
+
+
+# ── Footer ────────────────────────────────────────────────
+st.markdown("<hr style='margin:16px 0 8px 0'>", unsafe_allow_html=True)
+st.markdown("""
+<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px 12px;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:28px;height:28px;border-radius:50%;
+                    background:linear-gradient(135deg,#6d28d9,#a78bfa);
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:12px;font-weight:700;color:white;">M</div>
+        <div>
+            <span style="font-size:13px;font-weight:500;color:#e8e8f0;">Md. Miraj-Ul-Islam</span>
+            <span style="font-size:11px;color:#555870;margin-left:8px;">CSE Student · Bangladesh</span>
+        </div>
+    </div>
+    <div style="font-size:12px;color:#3a3d50;">
+        🔗 <a href="https://github.com/Mrj086/MishiAIchatbot" target="_blank"
+               style="color:#3b82f6;text-decoration:none;">GitHub</a> ·
+        <a href="https://www.linkedin.com/in/md-miraj-ul-islam-77b30b26a/" target="_blank"
+           style="color:#3b82f6;text-decoration:none;">LinkedIn</a>
+    </div>
+</div>
+""", unsafe_allow_html=True)
