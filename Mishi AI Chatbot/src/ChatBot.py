@@ -268,7 +268,7 @@ if not st.session_state.messages:
     suggestions = [
         ("📊", "What is Data Science?",       "What is Data Science and why is it important in today's world?"),
         ("✍️", "Write me a short poem",       "Write me a beautiful short poem about the stars and the night sky"),
-        ("🎵", "Make a song for me",          "Write a short uplifting song with a chorus and two verses"),
+        ("🎵", "AI Engineer Roadmap",          "Write a proper roadmap for becoming an AI Engineer"),
         ("📚", "Daily routine for a student", "Make a daily routine for an ideal university student who wants to excel"),
     ]
     c1, c2 = st.columns(2)
